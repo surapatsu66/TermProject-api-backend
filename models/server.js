@@ -35,7 +35,7 @@ class Server {
         path.join(__dirname, "../../client/build/index.html")
       );
       */
-      res.send("<h1>Hello, This is API Back-end of Thanit.</h1>");
+      res.send("<h1>Hello, This is API Back-end of Surapat.</h1>");
     });
 
   }
