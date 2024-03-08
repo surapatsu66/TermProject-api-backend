@@ -5,10 +5,11 @@ const path = require("path");
 class Server {
   constructor() {
     this.app = express();
-    this.port = process.env.PORT || 3033;
+    this.port = process.env.PORT || 3031;
     this.paths = {
       auth: "/api/auth",
       homepage: "/api/homepage",
+      saveuser : "/api/saveuser",
     };
 
     this.middlewares();
@@ -29,15 +30,14 @@ class Server {
   routes() {
     this.app.use(this.paths.auth, require("../routes/auth"));
     this.app.use(this.paths.homepage, require("../routes/homepage"));
-    this.app.get("*", (req, res) => {
-      /*
-      res.sendFile(
-        path.join(__dirname, "../../client/build/index.html")
-      );
-      */
-      res.send("<h1>Hello, This is API Back-end of Surapat.</h1>");
-    });
+    this.app.use(this.paths.saveuser, require("../routes/saveuser"));
 
+    // Catch all requests that don't match any route
+    // this.app.get("*", (req, res) => {
+    //   res.sendFile(
+    //     path.join(__dirname, "../../client/build/index.html")
+    //   );
+    // });
   }
 
   listen() {
