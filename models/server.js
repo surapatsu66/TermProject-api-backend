@@ -29,12 +29,15 @@ class Server {
   routes() {
     this.app.use(this.paths.auth, require("../routes/auth"));
     this.app.use(this.paths.homepage, require("../routes/homepage"));
-    // Catch all requests that don't match any route
     this.app.get("*", (req, res) => {
+      /*
       res.sendFile(
         path.join(__dirname, "../../client/build/index.html")
       );
+      */
+      res.send("<h1>Hello, This is API Back-end of Thanit.</h1>");
     });
+
   }
 
   listen() {
