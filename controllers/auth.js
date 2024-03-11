@@ -1,63 +1,53 @@
 const { response } = require("express");
- 
-const mysql = require('mysql');
- 
+
+let mysql = require('mysql');
 const env = require('../env.js');
- 
 const config = require('../dbconfig.js')[env];
- 
+
 const login = async (req, res = response) => {
- 
   const { email, password } = req.body;
- 
+
+ // const email = req.body.email;
+ // const password  = req.body.password;
+
+  //----------------------
+
   let dbcon = mysql.createConnection(config);
- 
-  let QUERY = "SELECT * FROM users WHERE email = ?";
- 
-  dbcon.query(QUERY, [email], (err, results) => {
- 
-    if (err) {
- 
-      console.error("Database error:", err);
- 
-      return res.status(500).json({ msg: "Database error" });
- 
+
+  const userDetails = "SELECT * FROM users where email = '" + email + "'";
+  console.log(userDetails);
+
+  dbcon.query(userDetails, function (err, user) {
+    console.log(user);
+
+    if (user.length > 0) {
+
+      if (password !== user[0].password) {
+        return res.status(400).json({
+          msg: "User / Password are incorrect",
+        });
+      }
+
+      res.status(200).json({ user })
+
+      /*
+            res.json({
+              name: "Test User",
+              token: "A JWT token to keep the user logged in.",
+              msg: "Successful login",
+            });
+      */
+
+    } else { //  if (user.length > 0) 
+
+      // User not found
+      return res.status(401).json({ message: "User not found !" })
+
     }
- 
-    if (results.length === 0) {
- 
-      return res.status(400).json({ msg: "User not found" });
- 
-    }
- 
-    const user = results[0];
- 
-    // Check hashed password here
- 
-    if (password !== user.password) {
- 
-      return res.status(400).json({ msg: "Invalid password" });
- 
-    }
- 
-    // Authentication successful, generate token, etc.
- 
-    res.json({
- 
-      name: user.name,
- 
-      token: "A JWT token to keep the user logged in.",
- 
-      msg: "Successful login",
- 
-    });
- 
-  });
- 
+  })
+
 };
- 
+
 module.exports = {
- 
   login,
- 
 };
