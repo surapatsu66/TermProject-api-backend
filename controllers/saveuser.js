@@ -1,53 +1,44 @@
-const { response } = require("express");
+// saveuser.js
 
-let mysql = require('mysql');
+const mysql = require('mysql');
 const env = require('../env.js');
 const config = require('../dbconfig.js')[env];
 
-const login = async (req, res = response) => {
-  const { email, password } = req.body;
+const connection = mysql.createConnection({
+  host: config.host,
+  user: config.user,
+  port: config.port,
+  password: config.password,
+  database: config.database
+});
 
- // const email = req.body.email;
- // const password  = req.body.password;
+connection.connect((err) => {
+  if (err) {
+      console.error('Error connecting to MySQL:', err);
+  } else {
+      console.log('Connected to MySQL');
+  }
+});
 
-  //----------------------
+function saveUserData(userData) {
+  const { gender, name, location, email, login, picture ,dob} = userData;
+  const { title, first, last } = name;
+  const { country } = location;
+  const { username, password, md5, sha1, sha256, uuid } = login;
+  const { medium, large, thumbnail } = picture;
+  const dateOfBirth = new Date(dob.date).toISOString().slice(0, 19).replace('T', ' '); // แปลงรูปแบบของวันเกิด
 
-  let dbcon = mysql.createConnection(config);
+  console.log(userData);
 
-  const userDetails = "SELECT * FROM users where email = '" + email + "'";
-  console.log(userDetails);
+  const sql = 'INSERT INTO users SET ?';
+  const values = {gender, title, first, last, country,dob:dateOfBirth, uuid, email, username, password, md5, sha1, sha256, picture_large:large, picture_medium:medium, picture_thumbnail:thumbnail};
 
-  dbcon.query(userDetails, function (err, user) {
-    console.log(user);
-
-    if (user.length > 0) {
-
-      if (password !== user[0].password) {
-        return res.status(400).json({
-          msg: "User / Password are incorrect",
-        });
-      }
-
-      res.status(200).json({ user })
-
-      /*
-            res.json({
-              name: "Test User",
-              token: "A JWT token to keep the user logged in.",
-              msg: "Successful login",
-            });
-      */
-
-    } else { //  if (user.length > 0) 
-
-      // User not found
-      return res.status(401).json({ message: "User not found !" })
-
+  connection.query(sql, values, (error, results, fields) => {
+    if (error) {
+      return console.error('Error saving user data:', error.message);
     }
-  })
+    console.log('User data saved successfully!');
+  });
+}
 
-};
-
-module.exports = {
-  login,
-};
+module.exports = saveUserData;
